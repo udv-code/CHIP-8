@@ -40,4 +40,4 @@ project(
 ### Vendor
 
 ### Target
-add_subdirectory(chip-8-main)
+add_subdirectory(chip8-main)

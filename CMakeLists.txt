@@ -14,7 +14,7 @@ list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_CURRENT_LIST_DIR}/cmake")
 include(printhelp)
 
 ### Project config
-set(CHIP8_PROJECT_NAME "chip-8")
+set(CHIP8_PROJECT_NAME "chip8")
 set(CHIP8_VERSION_MAJOR 1)
 set(CHIP8_VERSION_MINOR 0)
 set(CHIP8_VERSION_HOTFIX 0)
@@ -38,6 +38,18 @@ project(
 )
 
 ### Vendor
+find_package(glfw3 3.3 REQUIRED)
+find_package(glad REQUIRED)
 
 ### Target
 add_subdirectory(chip8-main)
+
+target_link_libraries(
+		${CHIP8_TARGET_NAME}
+		PRIVATE
+		glfw
+		glad::glad
+)
+
+### Assets
+configure_file(assets/pong.rom ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/pong.rom COPYONLY)

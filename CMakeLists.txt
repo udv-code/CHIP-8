@@ -40,6 +40,7 @@ project(
 ### Vendor
 find_package(glfw3 3.3 REQUIRED)
 find_package(glad REQUIRED)
+find_package(OpenGL REQUIRED)
 
 ### Target
 add_subdirectory(chip8-main)
@@ -49,6 +50,7 @@ target_link_libraries(
 		PRIVATE
 		glfw
 		glad::glad
+		${OPENGL_LIBRARIES}
 )
 
 ### Assets

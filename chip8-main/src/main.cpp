@@ -16,7 +16,7 @@ constexpr int display_size_modifier = 10;
 constexpr int display_width = DISPLAY_WIDTH * display_size_modifier;
 constexpr int display_height = DISPLAY_HEIGHT * display_size_modifier;
 
-unsigned char screen_data[display_width][display_height][3];
+unsigned char screen_data[DISPLAY_WIDTH][DISPLAY_HEIGHT][3] = {0};
 //endregion
 //region GLFW Callbacks
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
@@ -29,11 +29,11 @@ GLuint display_texture;
 GLuint vbo, vao, ebo;
 
 constexpr float display_vertices[] = {
-		// Positions             // Texture coordinates
-		-0.75f, -0.75f, 0.0f,      0.0f, 0.0f,
-		 0.75f, -0.75f, 0.0f,      1.0f, 0.0f,
-		 0.75f,  0.75f, 0.0f,      1.0f, 1.0f,
-		-0.75f,  0.75f, 0.0f,      0.0f, 1.0f,
+		// Positions            // Texture coordinates
+		/*LB*/-1.0f, -1.0f, 0.0f, 0.0f, 0.0f,
+		/*RB*/ 1.0f, -1.0f, 0.0f, 1.0f, 0.0f,
+		/*RT*/ 1.0f, 1.0f, 0.0f, 1.0f, 1.0f,
+		/*LT*/-1.0f, 1.0f, 0.0f, 0.0f, 1.0f,
 };
 
 constexpr GLuint indices[] = {
@@ -121,12 +121,12 @@ int main(int argc, char **argv) {
 	// Clear screen data
 	for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
 		for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-			screen_data[x][y][0] = screen_data[x][y][1] = screen_data[x][y][2] = 255;
+			screen_data[x][y][0] = screen_data[x][y][1] = screen_data[x][y][2] = sin(glfwGetTime()) * 255;
 		}
 	}
 
 	// Create a texture
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, DISPLAY_WIDTH, DISPLAY_HEIGHT, 0, GL_RGB, GL_UNSIGNED_BYTE,
 	             (GLvoid *) screen_data);
 	glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
 		if (emulator->draw) {
 			glClear(GL_COLOR_BUFFER_BIT);
 
-			// update_display_texture(*emulator);
+			update_display_texture(*emulator);
 
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, display_texture);
@@ -182,13 +182,14 @@ int main(int argc, char **argv) {
 void update_display_texture(const chip8::chip8 &c8) {
 	glBindTexture(GL_TEXTURE_2D, display_texture);
 	// Update pixels
-	for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
-		for (int x = 0; x < DISPLAY_WIDTH; ++x) {
-			if (c8.gfx[(y * DISPLAY_WIDTH) + x] == 0) {
-				screen_data[x][y][0] = screen_data[x][y][1] = screen_data[x][y][2] = 0;    // Disabled
-			} else {
-				screen_data[x][y][0] = screen_data[x][y][1] = screen_data[x][y][2] = 255;  // Enabled
-			}
+	for (int x = 0; x < DISPLAY_WIDTH; ++x) {
+		for (int y = 0; y < DISPLAY_HEIGHT; ++y) {
+			// if (c8.gfx[(y * DISPLAY_WIDTH) + x] == 0) {
+			// 	screen_data[x][y][0] = screen_data[x][y][1] = screen_data[x][y][2] = 0;    // Disabled
+			// } else {
+			// 	screen_data[x][y][0] = screen_data[x][y][1] = screen_data[x][y][2] = 255;  // Enabled
+			// }
+			screen_data[x][y][0] = screen_data[x][y][1] = screen_data[x][y][2] = x + y;
 		}
 	}
 
@@ -196,7 +197,6 @@ void update_display_texture(const chip8::chip8 &c8) {
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT, GL_RGB, GL_UNSIGNED_BYTE,
 	                (GLvoid *) screen_data);
 	glGenerateMipmap(GL_TEXTURE_2D);
-
 }
 
 void process_input(GLFWwindow *window) {
